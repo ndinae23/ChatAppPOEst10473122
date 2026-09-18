@@ -78,9 +78,9 @@ public class Login {
                 && username.length() <= 5;
     }
 
-    // ---------------------------------------------------------
+  
     // PASSWORD VALIDATION
-    // ---------------------------------------------------------
+    
 
     public boolean checkPasswordComplexity() {
 
@@ -112,7 +112,7 @@ public class Login {
                 && hasSpecialCharacter;
     }
 
-    // ---------------------------------------------------------
+    
     // CELLPHONE VALIDATION
     // ---------------------------------------------------------
 
