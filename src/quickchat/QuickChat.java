@@ -8,9 +8,8 @@ public class QuickChat {
 
         Scanner input = new Scanner(System.in);
 
-        // -----------------------------------------------------
+
         // APPLICATION HEADING
-        // -----------------------------------------------------
 
         System.out.println("==================================");
         System.out.println("          QUICKCHAT");
