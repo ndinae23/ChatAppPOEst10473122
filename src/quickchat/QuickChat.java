@@ -37,9 +37,9 @@ public class QuickChat {
         System.out.print("Create password: ");
         String password = input.nextLine();
 
-        // -----------------------------------------------------
+     
         // CELLPHONE NUMBER
-        // -----------------------------------------------------
+        
 
         System.out.print(
                 "Enter South African cellphone number "
