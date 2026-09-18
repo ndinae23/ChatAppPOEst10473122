@@ -15,9 +15,8 @@ public class QuickChat {
         System.out.println("          QUICKCHAT");
         System.out.println("==================================");
 
-        // -----------------------------------------------------
+        
         // PERSONAL INFORMATION
-        // -----------------------------------------------------
 
         System.out.print("Enter first name: ");
         String firstName = input.nextLine().trim();
@@ -25,16 +24,15 @@ public class QuickChat {
         System.out.print("Enter last name: ");
         String lastName = input.nextLine().trim();
 
-        // -----------------------------------------------------
+        
         // USERNAME
-        // -----------------------------------------------------
+        
 
         System.out.print("Create username: ");
         String username = input.nextLine().trim();
 
-        // -----------------------------------------------------
+        
         // PASSWORD
-        // -----------------------------------------------------
 
         System.out.print("Create password: ");
         String password = input.nextLine();
