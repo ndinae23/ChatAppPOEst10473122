@@ -38,7 +38,7 @@ public class Login {
             "Username or password incorrect, please try again.";
 
     
-    // ATTRIBUTES
+    // DECLARATION
 
     private String firstName;
     private String lastName;
@@ -51,7 +51,7 @@ public class Login {
             Pattern.compile("^\\+27\\d{9}$");
 
     
-    // Declaration
+    // DECLARATION
    
 
     public Login(String firstName,
@@ -67,9 +67,8 @@ public class Login {
         this.cellPhoneNumber = cellPhoneNumber;
     }
 
-    // ---------------------------------------------------------
     // USERNAME VALIDATION
-    // ---------------------------------------------------------
+    
 
     public boolean checkUserName() {
 
@@ -126,9 +125,9 @@ public class Login {
                 .matches();
     }
 
-    // ---------------------------------------------------------
+    
     // USERNAME MESSAGE
-    // ---------------------------------------------------------
+   
 
     public String getUsernameMessage() {
 
@@ -139,9 +138,8 @@ public class Login {
         return USERNAME_ERROR;
     }
 
-    // ---------------------------------------------------------
     // PASSWORD MESSAGE
-    // ---------------------------------------------------------
+    
 
     public String getPasswordMessage() {
 
@@ -152,9 +150,9 @@ public class Login {
         return PASSWORD_ERROR;
     }
 
-    // ---------------------------------------------------------
+    
     // CELLPHONE MESSAGE
-    // ---------------------------------------------------------
+    
 
     public String getCellPhoneMessage() {
 
@@ -165,9 +163,9 @@ public class Login {
         return CELL_ERROR;
     }
 
-    // ---------------------------------------------------------
+   
     // REGISTRATION
-    // ---------------------------------------------------------
+    
 
     public String registerUser() {
 
@@ -199,9 +197,9 @@ public class Login {
                 && enteredPassword.equals(password);
     }
 
-    // ---------------------------------------------------------
+    
     // LOGIN STATUS
-    // ---------------------------------------------------------
+    
 
     public String returnLoginStatus(String enteredUsername,
                                     String enteredPassword) {
@@ -215,9 +213,9 @@ public class Login {
         return LOGIN_ERROR;
     }
 
-    // ---------------------------------------------------------
+    
     // GETTERS
-    // ---------------------------------------------------------
+    
 
     public String getFirstName() {
         return firstName;
