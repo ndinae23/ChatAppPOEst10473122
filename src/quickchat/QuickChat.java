@@ -83,9 +83,9 @@ public class QuickChat {
             );
         }
 
-        // -----------------------------------------------------
+       
         // REGISTRATION RESULT
-        // -----------------------------------------------------
+     
 
         System.out.println();
         System.out.println("REGISTRATION STATUS");
@@ -95,9 +95,9 @@ public class QuickChat {
 
         System.out.println(registrationResult);
 
-        // -----------------------------------------------------
+        
         // PREVENT LOGIN IF REGISTRATION FAILED
-        // -----------------------------------------------------
+        
 
         if (!user.checkUserName()
                 || !user.checkPasswordComplexity()
@@ -113,9 +113,9 @@ public class QuickChat {
             return;
         }
 
-        // -----------------------------------------------------
+        
         // LOGIN
-        // -----------------------------------------------------
+        
 
         System.out.println();
         System.out.println("==================================");
@@ -128,9 +128,9 @@ public class QuickChat {
         System.out.print("Enter password: ");
         String enteredPassword = input.nextLine();
 
-        // -----------------------------------------------------
+        
         // LOGIN RESULT
-        // -----------------------------------------------------
+        
 
         System.out.println();
 
