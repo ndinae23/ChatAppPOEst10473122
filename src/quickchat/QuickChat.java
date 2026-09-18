@@ -60,9 +60,9 @@ public class QuickChat {
                 cellPhoneNumber
         );
 
-        // -----------------------------------------------------
+        
         // DISPLAY VALIDATION RESULTS
-        // -----------------------------------------------------
+        
 
         System.out.println();
         System.out.println(user.getUsernameMessage());
