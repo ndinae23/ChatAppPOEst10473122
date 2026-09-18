@@ -48,9 +48,9 @@ public class QuickChat {
 
         String cellPhoneNumber = input.nextLine().trim();
 
-        // -----------------------------------------------------
+        
         // CREATE USER
-        // -----------------------------------------------------
+       
 
         Login user = new Login(
                 firstName,
