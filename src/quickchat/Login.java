@@ -114,7 +114,6 @@ public class Login {
 
     
     // CELLPHONE VALIDATION
-    // ---------------------------------------------------------
 
     public boolean checkCellPhoneNumber() {
 
@@ -187,9 +186,7 @@ public class Login {
         return REGISTRATION_SUCCESS;
     }
 
-    // ---------------------------------------------------------
     // LOGIN AUTHENTICATION
-    // ---------------------------------------------------------
 
     public boolean loginUser(String enteredUsername,
                              String enteredPassword) {
