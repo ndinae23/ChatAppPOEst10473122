@@ -50,9 +50,9 @@ public class Login {
     private static final Pattern SA_CELL_PATTERN =
             Pattern.compile("^\\+27\\d{9}$");
 
-    // ---------------------------------------------------------
-    // CONSTRUCTOR
-    // ---------------------------------------------------------
+    
+    // Declaration
+   
 
     public Login(String firstName,
                  String lastName,
