@@ -4,9 +4,8 @@ import java.util.regex.Pattern;
 
 public class Login {
 
-    // ---------------------------------------------------------
+    
     // CONSTANT MESSAGES
-    // ---------------------------------------------------------
 
     public static final String USERNAME_SUCCESS =
             "Username successfully captured.";
@@ -38,9 +37,8 @@ public class Login {
     public static final String LOGIN_ERROR =
             "Username or password incorrect, please try again.";
 
-    // ---------------------------------------------------------
+    
     // ATTRIBUTES
-    // ---------------------------------------------------------
 
     private String firstName;
     private String lastName;
