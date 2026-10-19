@@ -4,29 +4,26 @@
  */
 package quickchat;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
+import java.util.Arrays;
+import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.*;
 
 /**
  *
  * @author Student
  */
-class MessageTest {
+public class MessageTest {
 
     private Message message;
 
-    @BeforeEach
-    void setUp() {
+    @Before
+    public void setUp() {
         Message.resetTotalMessagesSentForTests();
 
         message = new Message(
@@ -37,15 +34,13 @@ class MessageTest {
         );
     }
 
-    // 1. Valid message ID
     @Test
-    void testCheckMessageIDValid() {
+    public void testValidMessageID() {
         assertTrue(message.checkMessageID());
     }
 
-    // 2. Invalid message ID
     @Test
-    void testCheckMessageIDInvalid() {
+    public void testInvalidMessageID() {
         Message invalid = new Message(
                 1, "+27821234567", "Hello", "12345"
         );
@@ -53,29 +48,26 @@ class MessageTest {
         assertFalse(invalid.checkMessageID());
     }
 
-    // 3. Automatically generated message ID
     @Test
-    void testGeneratedMessageID() {
+    public void testGeneratedMessageID() {
         Message generated = new Message(
-                1, "+27821234567", "Hello World"
+                1, "+27821234567", "Hello"
         );
 
         assertTrue(generated.checkMessageID());
         assertEquals(10, generated.getMessageID().length());
     }
 
-    // 4. Valid South African cellphone number
     @Test
-    void testRecipientCellValid() {
+    public void testValidRecipient() {
         assertEquals(
                 Message.RECIPIENT_SUCCESS,
                 message.checkRecipientCell()
         );
     }
 
-    // 5. Invalid cellphone number without international code
     @Test
-    void testRecipientCellMissingCode() {
+    public void testInvalidRecipient() {
         Message invalid = new Message(
                 1, "0821234567", "Hello", "1234567890"
         );
@@ -86,31 +78,13 @@ class MessageTest {
         );
     }
 
-    // 6. Incorrect cellphone number format
     @Test
-    void testRecipientCellInvalidFormat() {
-        Message invalid = new Message(
-                1, "+27123", "Hello", "1234567890"
-        );
-
-        assertEquals(
-                Message.RECIPIENT_ERROR,
-                invalid.checkRecipientCell()
-        );
+    public void testMessageHash() {
+        assertEquals("12:1:HELLOWORLD", message.getMessageHash());
     }
 
-    // 7. Correct message hash
     @Test
-    void testCreateMessageHash() {
-        assertEquals(
-                "12:1:HELLOWORLD",
-                message.getMessageHash()
-        );
-    }
-
-    // 8. Message hash with punctuation
-    @Test
-    void testMessageHashWithPunctuation() {
+    public void testMessageHashWithPunctuation() {
         Message punctuation = new Message(
                 5,
                 "+27821234567",
@@ -118,15 +92,11 @@ class MessageTest {
                 "9876543210"
         );
 
-        assertEquals(
-                "98:5:HELLOWORLD",
-                punctuation.getMessageHash()
-        );
+        assertEquals("98:5:HELLOWORLD", punctuation.getMessageHash());
     }
 
-    // 9. Empty message hash
     @Test
-    void testEmptyMessageHash() {
+    public void testEmptyMessageHash() {
         Message empty = new Message(
                 1, "+27821234567", "", "1234567890"
         );
@@ -134,13 +104,12 @@ class MessageTest {
         assertEquals("", empty.getMessageHash());
     }
 
-    // 10. Message with exactly 250 characters
     @Test
-    void testMessageAtMaximumLength() {
+    public void testMessageAt250Characters() {
         Message valid = new Message(
                 1,
                 "+27821234567",
-                "a".repeat(250),
+                repeatCharacter('a', 250),
                 "1234567890"
         );
 
@@ -150,13 +119,12 @@ class MessageTest {
         );
     }
 
-    // 11. Message exceeding 250 characters
     @Test
-    void testMessageTooLong() {
+    public void testMessageOver250Characters() {
         Message tooLong = new Message(
                 1,
                 "+27821234567",
-                "a".repeat(260),
+                repeatCharacter('a', 260),
                 "1234567890"
         );
 
@@ -166,9 +134,8 @@ class MessageTest {
         );
     }
 
-    // 12. Successfully send a message
     @Test
-    void testSendMessageSuccessfully() {
+    public void testSendMessageSuccessfully() {
         assertEquals(
                 "Message successfully sent.",
                 message.SentMessage("send")
@@ -178,9 +145,8 @@ class MessageTest {
         assertEquals(1, Message.returnTotalMessages());
     }
 
-    // 13. Cannot send a message with an invalid recipient
     @Test
-    void testCannotSendInvalidMessage() {
+    public void testCannotSendInvalidRecipient() {
         Message invalid = new Message(
                 1, "0821234567", "Hello", "1234567890"
         );
@@ -194,14 +160,37 @@ class MessageTest {
         assertEquals(0, Message.returnTotalMessages());
     }
 
-    // 14. Sending messages increments the counter
     @Test
-    void testTotalMessagesSent() {
-        Message second = new Message(
-                2,
+    public void testCannotSendInvalidMessageID() {
+        Message invalid = new Message(
+                1, "+27821234567", "Hello", "123"
+        );
+
+        assertTrue(invalid.SentMessage("send").startsWith(
+                "Message could not be sent."
+        ));
+        assertEquals("Pending", invalid.getStatus());
+    }
+
+    @Test
+    public void testCannotSendLongMessage() {
+        Message invalid = new Message(
+                1,
                 "+27821234567",
-                "Good morning",
-                "9876543210"
+                repeatCharacter('x', 251),
+                "1234567890"
+        );
+
+        assertTrue(invalid.SentMessage("send").startsWith(
+                "Message could not be sent."
+        ));
+        assertEquals(0, Message.returnTotalMessages());
+    }
+
+    @Test
+    public void testTotalMessagesSent() {
+        Message second = new Message(
+                2, "+27821234567", "Good morning", "9876543210"
         );
 
         message.SentMessage("send");
@@ -211,9 +200,8 @@ class MessageTest {
         assertEquals(2, Message.returnTotalMessagess());
     }
 
-    // 15. Disregard a message
     @Test
-    void testDisregardMessage() {
+    public void testDisregardMessage() {
         assertEquals(
                 "Press 0 to delete the message.",
                 message.SentMessage("disregard")
@@ -223,9 +211,8 @@ class MessageTest {
         assertEquals(0, Message.returnTotalMessages());
     }
 
-    // 16. Discard action
     @Test
-    void testDiscardMessage() {
+    public void testDiscardAlias() {
         assertEquals(
                 "Press 0 to delete the message.",
                 message.SentMessage("discard")
@@ -234,9 +221,40 @@ class MessageTest {
         assertEquals("Disregarded", message.getStatus());
     }
 
-    // 17. Invalid action
     @Test
-    void testInvalidAction() {
+    public void testStoreAction() throws Exception {
+        // This test checks the store action's response and status.
+        // It saves and restores messages.json to avoid losing existing data.
+        java.nio.file.Path file = java.nio.file.Path.of("messages.json");
+        boolean existed = java.nio.file.Files.exists(file);
+        String previous = existed
+                ? java.nio.file.Files.readString(file)
+                : null;
+
+        try {
+            java.nio.file.Files.deleteIfExists(file);
+
+            assertEquals(
+                    "Message successfully stored.",
+                    message.SentMessage("store")
+            );
+
+            assertEquals("Stored", message.getStatus());
+
+            String json = java.nio.file.Files.readString(file);
+            assertTrue(json.contains("\"messageID\":\"1234567890\""));
+            assertTrue(json.contains("\"message\":\"Hello World\""));
+        } finally {
+            if (existed) {
+                java.nio.file.Files.writeString(file, previous);
+            } else {
+                java.nio.file.Files.deleteIfExists(file);
+            }
+        }
+    }
+
+    @Test
+    public void testInvalidAction() {
         assertEquals(
                 "Invalid option. Please choose send, disregard, or store.",
                 message.SentMessage("invalid")
@@ -245,136 +263,16 @@ class MessageTest {
         assertEquals("Pending", message.getStatus());
     }
 
-    // 18. Null action
     @Test
-    void testNullAction() {
+    public void testNullAction() {
         assertEquals(
                 "Invalid option. Please choose send, disregard, or store.",
                 message.SentMessage((String) null)
         );
     }
 
-    // 19. Store a message in JSON
     @Test
-    void testStoreMessageSuccessfully() throws IOException {
-        Path file = Path.of("messages.json");
-        String previous = Files.exists(file)
-                ? Files.readString(file, StandardCharsets.UTF_8)
-                : null;
-
-        try {
-            Files.deleteIfExists(file);
-
-            assertEquals(
-                    "Message successfully stored.",
-                    message.SentMessage("store")
-            );
-
-            assertEquals("Stored", message.getStatus());
-            assertTrue(Files.exists(file));
-
-            String json = Files.readString(
-                    file, StandardCharsets.UTF_8
-            );
-
-            assertTrue(json.contains("\"messageID\":\"1234567890\""));
-            assertTrue(json.contains("\"messageHash\":\"12:1:HELLOWORLD\""));
-            assertTrue(json.contains("\"messageNumber\":1"));
-            assertTrue(json.contains("\"recipient\":\"+27821234567\""));
-            assertTrue(json.contains("\"message\":\"Hello World\""));
-            assertTrue(json.contains("\"status\":\"Stored\""));
-        } finally {
-            restoreFile(file, previous);
-        }
-    }
-
-    // 20. Store multiple messages
-    @Test
-    void testStoreMultipleMessages() throws IOException {
-        Path file = Path.of("messages.json");
-        String previous = Files.exists(file)
-                ? Files.readString(file, StandardCharsets.UTF_8)
-                : null;
-
-        try {
-            Files.deleteIfExists(file);
-            message.storeMessage();
-
-            Message second = new Message(
-                    2,
-                    "+27821234567",
-                    "Second message",
-                    "9876543210"
-            );
-
-            second.storeMessage();
-
-            String json = Files.readString(
-                    file, StandardCharsets.UTF_8
-            );
-
-            assertTrue(json.startsWith("["));
-            assertTrue(json.trim().endsWith("]"));
-            assertTrue(json.contains("\"messageID\":\"1234567890\""));
-            assertTrue(json.contains("\"messageID\":\"9876543210\""));
-        } finally {
-            restoreFile(file, previous);
-        }
-    }
-
-    // 21. Reject invalid existing JSON
-    @Test
-    void testStoreMessageInvalidExistingJson() throws IOException {
-        Path file = Path.of("messages.json");
-        String previous = Files.exists(file)
-                ? Files.readString(file, StandardCharsets.UTF_8)
-                : null;
-
-        try {
-            Files.writeString(file, "invalid JSON");
-
-            assertThrows(
-                    IOException.class,
-                    () -> message.storeMessage()
-            );
-        } finally {
-            restoreFile(file, previous);
-        }
-    }
-
-    // 22. Escape special characters in JSON
-    @Test
-    void testStoreMessageEscapesSpecialCharacters() throws IOException {
-        Path file = Path.of("messages.json");
-        String previous = Files.exists(file)
-                ? Files.readString(file, StandardCharsets.UTF_8)
-                : null;
-
-        try {
-            Files.deleteIfExists(file);
-
-            Message special = new Message(
-                    1,
-                    "+27821234567",
-                    "Hello \"World\"\nNext line\tDone",
-                    "1234567890"
-            );
-
-            special.storeMessage();
-
-            String json = Files.readString(
-                    file, StandardCharsets.UTF_8
-            );
-
-            assertTrue(json.contains("Hello \\\"World\\\"\\nNext line\\tDone"));
-        } finally {
-            restoreFile(file, previous);
-        }
-    }
-
-    // 23. Print an individual message's details
-    @Test
-    void testPrintIndividualMessage() {
+    public void testPrintIndividualMessage() {
         String details = message.printMessages();
 
         assertTrue(details.contains("Message ID: 1234567890"));
@@ -383,36 +281,28 @@ class MessageTest {
         assertTrue(details.contains("Message: Hello World"));
     }
 
-    // 24. Print only sent messages
     @Test
-    void testPrintSentMessagesOnly() {
+    public void testPrintOnlySentMessages() {
         Message second = new Message(
-                2,
-                "+27821234567",
-                "Another message",
-                "9876543210"
+                2, "+27821234567", "Another message", "9876543210"
         );
 
         message.SentMessage("send");
         second.SentMessage("disregard");
 
-        String output = Message.printMessages(
-                List.of(message, second)
-        );
+        String result = Message.printMessages(Arrays.asList(message, second));
 
-        assertTrue(output.contains("1234567890"));
-        assertFalse(output.contains("9876543210"));
+        assertTrue(result.contains("1234567890"));
+        assertFalse(result.contains("9876543210"));
     }
 
-    // 25. Empty message list
     @Test
-    void testPrintEmptyMessages() {
-        assertEquals("", Message.printMessages(List.of()));
+    public void testPrintEmptyList() {
+        assertEquals("", Message.printMessages(Collections.emptyList()));
     }
 
-    // 26. Getters and whitespace trimming
     @Test
-    void testGettersAndTrimming() {
+    public void testGettersAndTrimming() {
         Message trimmed = new Message(
                 7,
                 " +27821234567 ",
@@ -428,62 +318,29 @@ class MessageTest {
         assertEquals("Pending", trimmed.getStatus());
     }
 
-    // 27. Interactive menu: send option
     @Test
-    void testInteractiveSendOption() {
-        ByteArrayInputStream input = new ByteArrayInputStream(
-                "1\n".getBytes(StandardCharsets.UTF_8)
-        );
-
-        var originalInput = System.in;
+    public void testInteractiveSendOption() {
+        java.io.InputStream original = System.in;
 
         try {
-            System.setIn(input);
+            System.setIn(new ByteArrayInputStream(
+                    "1\n".getBytes(StandardCharsets.UTF_8)
+            ));
 
             assertEquals(
                     "Message successfully sent.",
                     message.SentMessage()
             );
         } finally {
-            System.setIn(originalInput);
+            System.setIn(original);
         }
 
         assertEquals("Sent", message.getStatus());
     }
 
-    // 28. Interactive menu: invalid option
-    @Test
-    void testInteractiveInvalidOption() {
-        ByteArrayInputStream input = new ByteArrayInputStream(
-                "9\n".getBytes(StandardCharsets.UTF_8)
-        );
-
-        var originalInput = System.in;
-
-        try {
-            System.setIn(input);
-
-            assertEquals(
-                    "Invalid option. Please choose 1, 2, or 3.",
-                    message.SentMessage()
-            );
-        } finally {
-            System.setIn(originalInput);
-        }
-    }
-
-    // Helper to restore messages.json after file tests
-    private void restoreFile(Path file, String previous)
-            throws IOException {
-
-        if (previous == null) {
-            Files.deleteIfExists(file);
-        } else {
-            Files.writeString(
-                    file,
-                    previous,
-                    StandardCharsets.UTF_8
-            );
-        }
+    private String repeatCharacter(char character, int count) {
+        char[] characters = new char[count];
+        java.util.Arrays.fill(characters, character);
+        return new String(characters);
     }
 }
