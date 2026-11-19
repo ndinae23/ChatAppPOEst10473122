@@ -11,6 +11,7 @@ import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -336,6 +337,187 @@ public class MessageTest {
         }
 
         assertEquals("Sent", message.getStatus());
+    }
+
+
+    // =====================================================================
+    //  PART 3 UNIT TESTS (test data from the task specification)
+    // =====================================================================
+
+    /** Loads Test Data Messages 1-4 into the arrays by flag (no hard-coding in the app itself). */
+    private void loadTestData1To4() {
+        Message.addMessage(new Message(1, "+27834557896", "Did you get the cake?", "1000000001"), "Sent");
+        Message.addMessage(new Message(2, "+27838884567",
+                "Where are you? You are late! I have asked you to be on time.", "1000000002"), "Stored");
+        Message.addMessage(new Message(3, "+27834484567", "Yohoooo, I am at your gate.", "1000000003"), "Disregard");
+        Message.addMessage(new Message(4, "0838884567", "It is dinner time!", "0838884567"), "Sent");
+    }
+
+    private void loadTestMessage5() {
+        Message.addMessage(new Message(5, "+27838884567", "Ok, I am leaving without you.", "1000000005"), "Stored");
+    }
+
+    @Test
+    public void testSentMessagesArrayCorrectlyPopulated() {
+        loadTestData1To4();
+
+        assertEquals(
+                Arrays.asList("Did you get the cake?", "It is dinner time!"),
+                Message.getSentMessageTexts()
+        );
+    }
+
+    @Test
+    public void testDisregardedAndStoredArraysPopulated() {
+        loadTestData1To4();
+
+        assertEquals(1, Message.getDisregardedMessages().size());
+        assertEquals(1, Message.getStoredMessages().size());
+        assertEquals(4, Message.getMessageHashes().size());
+        assertEquals(4, Message.getMessageIDs().size());
+    }
+
+    @Test
+    public void testDisplayLongestMessage() {
+        loadTestData1To4();
+
+        assertEquals(
+                "Where are you? You are late! I have asked you to be on time.",
+                Message.findLongestStoredMessage().getMessageText()
+        );
+    }
+
+    @Test
+    public void testSearchForMessageID() {
+        loadTestData1To4();
+
+        assertEquals(
+                "It is dinner time!",
+                Message.findMessageByID("0838884567").getMessageText()
+        );
+    }
+
+    @Test
+    public void testSearchForMessageIDNotFound() {
+        loadTestData1To4();
+
+        assertNull(Message.findMessageByID("9999999999"));
+    }
+
+    @Test
+    public void testSearchAllMessagesForRecipient() {
+        loadTestData1To4();
+        loadTestMessage5();
+
+        List<String> found = new java.util.ArrayList<>();
+        for (Message m : Message.findMessagesByRecipient("+27838884567")) {
+            found.add(m.getMessageText());
+        }
+
+        assertEquals(
+                Arrays.asList(
+                        "Where are you? You are late! I have asked you to be on time.",
+                        "Ok, I am leaving without you."
+                ),
+                found
+        );
+    }
+
+    @Test
+    public void testDeleteMessageUsingHash() {
+        loadTestData1To4();
+
+        String hash = Message.getStoredMessages().get(0).getMessageHash();
+        assertEquals("10:2:WHERETIME", hash);
+
+        assertEquals(
+                "Message: \"Where are you? You are late! I have asked you to be on time.\" successfully deleted.",
+                Message.deleteMessageByHash(hash)
+        );
+
+        assertEquals(0, Message.getStoredMessages().size());
+        assertFalse(Message.getMessageHashes().contains(hash));
+        assertFalse(Message.getMessageIDs().contains("1000000002"));
+    }
+
+    @Test
+    public void testDeleteMessageHashNotFound() {
+        loadTestData1To4();
+
+        assertEquals(
+                "No message found with hash 99:9:NOPE.",
+                Message.deleteMessageByHash("99:9:NOPE")
+        );
+        assertEquals(4, Message.totalMessagesInArrays());
+    }
+
+    @Test
+    public void testDisplayReport() {
+        loadTestData1To4();
+
+        String report = Message.report(Message.getSentMessages());
+
+        assertTrue(report.contains("Message Hash: 10:1:DIDCAKE"));
+        assertTrue(report.contains("Recipient: +27834557896"));
+        assertTrue(report.contains("Message: Did you get the cake?"));
+        assertTrue(report.contains("Message Hash: 08:4:ITTIME"));
+        assertEquals("No messages found.", Message.report(Collections.emptyList()));
+    }
+
+    @Test
+    public void testDisplaySenderAndRecipient() {
+        loadTestData1To4();
+
+        assertEquals(
+                "Sender: Developer | Recipient: +27838884567",
+                Message.displaySenderAndRecipient(Message.getStoredMessages())
+        );
+    }
+
+    @Test
+    public void testSendActionPopulatesSentArray() {
+        message.SentMessage("send");
+
+        assertEquals(1, Message.getSentMessages().size());
+        assertEquals(1, Message.getMessageHashes().size());
+        assertEquals("1234567890", Message.getMessageIDs().get(0));
+    }
+
+    @Test
+    public void testStoredMessagesReadFromJsonFile() throws Exception {
+        java.nio.file.Path file = java.nio.file.Files.createTempFile("quickchat", ".json");
+        try {
+            java.nio.file.Files.writeString(file,
+                    "[\n  {\"messageID\":\"1000000002\",\"messageHash\":\"10:2:WHERETIME\","
+                    + "\"messageNumber\":2,\"recipient\":\"+27838884567\","
+                    + "\"message\":\"Say \\\"hi\\\", ok\",\"status\":\"Stored\"}\n]\n");
+
+            assertEquals(1, Message.loadStoredMessages(file));
+            assertEquals(0, Message.loadStoredMessages(file)); // no duplicates on reload
+
+            Message loaded = Message.getStoredMessages().get(0);
+            assertEquals("Say \"hi\", ok", loaded.getMessageText());
+            assertEquals("+27838884567", loaded.getRecipient());
+            assertEquals("10:2:SAYOK", loaded.getMessageHash());
+        } finally {
+            java.nio.file.Files.deleteIfExists(file);
+        }
+    }
+
+    @Test
+    public void testSaveThenLoadRoundTrip() throws Exception {
+        java.nio.file.Path file = java.nio.file.Files.createTempFile("quickchat", ".json");
+        try {
+            loadTestData1To4();
+            loadTestMessage5();
+            Message.saveStoredMessages(file);
+
+            Message.resetTotalMessagesSentForTests();
+            assertEquals(2, Message.loadStoredMessages(file));
+            assertEquals(2, Message.getStoredMessages().size());
+        } finally {
+            java.nio.file.Files.deleteIfExists(file);
+        }
     }
 
     private String repeatCharacter(char character, int count) {
